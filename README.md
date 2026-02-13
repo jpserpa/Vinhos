@@ -10,7 +10,6 @@ body { margin:0; font-family: Arial; display: flex; height: 100vh; }
 #sidebar {
   width: 350px;
   min-width: 250px;
-  max-width: 40%;
   height: 100%;
   padding: 15px;
   background: #f4f4f4;
@@ -29,11 +28,8 @@ button.fornecedor {
 button.fornecedor:hover { background-color: #ddd; }
 h2 { margin-top: 0; font-size: 18px; }
 label { font-weight: bold; }
-@media (max-width: 768px){
-  body { flex-direction: column; }
-  #sidebar { width: 100%; max-height: 40%; }
-  #map { flex-grow: 1; height: 60%; }
-}
+
+/* REMOVIDO o media query que jogava o mapa para baixo */
 </style>
 </head>
 <body>
@@ -119,7 +115,6 @@ function atualizarMapa() {
       .bindPopup(`<b>${d.fornecedor}</b><br>${d.produto}<br>${d.cidade}<br>${d.regiao}`);
     markers.push(m);
   });
-  // Ajusta o mapa para caber todos os pontos da região
   if(filtrados.length>0){
     const group = L.featureGroup(markers);
     map.fitBounds(group.getBounds().pad(0.3));
@@ -129,9 +124,9 @@ function atualizarMapa() {
 function focarFornecedor(fornecedorNome) {
   const ponto = dados.find(d => d.fornecedor === fornecedorNome);
   if (ponto) {
-    // Faz um zoom leve para perceber a posição dentro da região
+    // Zoom leve para perceber a posição dentro da região
     const currentZoom = map.getZoom();
-    const targetZoom = Math.max(currentZoom, 8); // aumenta até 8 se estiver menor
+    const targetZoom = Math.min(currentZoom + 2, 10); // aumenta ligeiro até 10
     map.setView([ponto.lat, ponto.lng], targetZoom, {animate:true});
     L.popup()
       .setLatLng([ponto.lat, ponto.lng])
