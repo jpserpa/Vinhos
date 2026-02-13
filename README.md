@@ -91,8 +91,15 @@ const dados = [
 const cores = { "Alentejo":"#d62728", "Setúbal":"#1f77b4", "Douro":"#2ca02c", "Vinho Verde":"#ff7f0e", "Lisboa":"#9467bd", "Algarve":"#8c564b", "Açores":"#e377c2", "Madeira":"#7f7f7f" };
 
 // ----- MAPA -----
-const map = L.map('map').setView([39.5, -8],6);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{ attribution:'&copy; OpenStreetMap &copy; CARTO', subdomains:'abcd', maxZoom:19 }).addTo(map);
+const map = L.map('map');
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+  attribution:'&copy; OpenStreetMap &copy; CARTO', subdomains:'abcd', maxZoom:19
+}).addTo(map);
+
+// Limites de Portugal para evitar barras cinza
+const portugalBounds = [[32.5, -9.5],[42.2, -6.0]];
+map.setMaxBounds(portugalBounds);
+map.fitBounds(portugalBounds);
 
 // ----- MARCADORES -----
 let markers = {};
@@ -126,7 +133,6 @@ function atualizarMapa(filtrados){
   Object.values(markers).forEach(m=>map.removeLayer(m));
   const usados=[...new Set(filtrados.map(d=>d.fornecedor))];
   usados.forEach(f=>markers[f].addTo(map));
-  if(filtrados.length>0){ const group=L.featureGroup(filtrados.map(d=>markers[d.fornecedor])); map.fitBounds(group.getBounds().pad(0.3)); }
 }
 
 // ----- MOSTRAR VINHOS POR FORNECEDOR -----
