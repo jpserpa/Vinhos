@@ -2,26 +2,22 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<title>Mapa Interativo dos Vinhos - Mobile Friendly</title>
+<title>Mapa Interativo dos Vinhos - Layout Lado a Lado</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <style>
-body { margin:0; font-family: Arial; }
+body { margin:0; font-family: Arial; display: flex; height: 100vh; }
 #sidebar {
-  width: 300px;
-  max-width: 80%;
-  height: 100vh;
-  float: left;
+  width: 350px;
+  min-width: 250px;
+  max-width: 40%;
+  height: 100%;
   padding: 15px;
   background: #f4f4f4;
+  overflow-y: auto;
   box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease;
 }
-#sidebar.collapsed {
-  transform: translateX(-310px);
-}
-#map { height: 100vh; margin-left:300px; transition: margin-left 0.3s ease; }
-#map.full { margin-left:0; }
+#map { flex-grow:1; height:100%; }
 button.fornecedor {
   width: 100%;
   padding: 12px;
@@ -30,32 +26,18 @@ button.fornecedor {
   text-align: left;
   font-size: 14px;
 }
-button.fornecedor:hover {
-  background-color: #ddd;
-}
+button.fornecedor:hover { background-color: #ddd; }
 h2 { margin-top: 0; font-size: 18px; }
-#menuToggle {
-  display:none;
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 1000;
-  padding: 8px 12px;
-  background:#f4f4f4;
-  border:1px solid #ccc;
-  cursor:pointer;
-}
+label { font-weight: bold; }
 @media (max-width: 768px){
-  #sidebar { position:absolute; z-index:999; height:100%; transform:translateX(-310px);}
-  #sidebar.collapsed { transform:translateX(0);}
-  #map { margin-left:0;}
-  #menuToggle { display:block; }
+  body { flex-direction: column; }
+  #sidebar { width: 100%; max-height: 40%; }
+  #map { flex-grow: 1; height: 60%; }
 }
 </style>
 </head>
 <body>
 
-<div id="menuToggle">☰ Menu</div>
 <div id="sidebar">
   <h2>Vinhos de Portugal</h2>
   <label>Região</label>
@@ -94,8 +76,6 @@ let markers = [];
 const regiaoSelect = document.getElementById("regiao");
 const fornecedoresLista = document.getElementById("fornecedoresLista");
 const contador = document.getElementById("contador");
-const menuToggle = document.getElementById("menuToggle");
-const sidebar = document.getElementById("sidebar");
 
 // ----- CORES POR REGIÃO -----
 const cores = {
@@ -154,12 +134,6 @@ function focarFornecedor(fornecedorNome) {
       .setContent(`<b>${ponto.fornecedor}</b><br>${ponto.produto}<br>${ponto.cidade}<br>${ponto.regiao}`)
       .openOn(map);
   }
-}
-
-// ----- SIDEBAR MOBILE -----
-menuToggle.onclick = () => {
-  sidebar.classList.toggle("collapsed");
-  map.classList.toggle("full");
 }
 
 // ----- INICIALIZAÇÃO -----
