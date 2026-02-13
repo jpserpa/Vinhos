@@ -2,21 +2,23 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<title>Mapa Interativo dos Vinhos - Layout Lado a Lado</title>
+<title>Mapa Interativo dos Vinhos - Grid Layout</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <style>
-body { margin:0; font-family: Arial; display: flex; height: 100vh; }
-#sidebar {
-  width: 350px;
-  min-width: 250px;
+body, html { margin:0; padding:0; height:100%; font-family: Arial; }
+#container {
+  display: grid;
+  grid-template-columns: 350px 1fr; /* Sidebar fixa 350px, mapa ocupa restante */
   height: 100%;
+}
+#sidebar {
   padding: 15px;
   background: #f4f4f4;
   overflow-y: auto;
   box-shadow: 2px 0 5px rgba(0,0,0,0.1);
 }
-#map { flex-grow:1; height:100%; }
+#map { width:100%; height:100%; }
 button.fornecedor {
   width: 100%;
   padding: 12px;
@@ -29,20 +31,24 @@ button.fornecedor:hover { background-color: #ddd; }
 h2 { margin-top: 0; font-size: 18px; }
 label { font-weight: bold; }
 
-/* REMOVIDO o media query que jogava o mapa para baixo */
+/* Mobile: mantém grid, apenas sidebar menor e mapa ajusta automaticamente */
+@media(max-width: 500px){
+  #container { grid-template-columns: 200px 1fr; }
+}
 </style>
 </head>
 <body>
 
-<div id="sidebar">
-  <h2>Vinhos de Portugal</h2>
-  <label>Região</label>
-  <select id="regiao"></select>
-  <div id="fornecedoresLista"></div>
-  <p id="contador"></p>
+<div id="container">
+  <div id="sidebar">
+    <h2>Vinhos de Portugal</h2>
+    <label>Região</label>
+    <select id="regiao"></select>
+    <div id="fornecedoresLista"></div>
+    <p id="contador"></p>
+  </div>
+  <div id="map"></div>
 </div>
-
-<div id="map"></div>
 
 <script>
 // ----- DADOS -----
@@ -124,9 +130,9 @@ function atualizarMapa() {
 function focarFornecedor(fornecedorNome) {
   const ponto = dados.find(d => d.fornecedor === fornecedorNome);
   if (ponto) {
-    // Zoom leve para perceber a posição dentro da região
+    // zoom leve para perceber localização
     const currentZoom = map.getZoom();
-    const targetZoom = Math.min(currentZoom + 2, 10); // aumenta ligeiro até 10
+    const targetZoom = Math.max(currentZoom, 8);
     map.setView([ponto.lat, ponto.lng], targetZoom, {animate:true});
     L.popup()
       .setLatLng([ponto.lat, ponto.lng])
