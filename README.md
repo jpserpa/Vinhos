@@ -119,21 +119,20 @@ function atualizarMapa() {
       .bindPopup(`<b>${d.fornecedor}</b><br>${d.produto}<br>${d.cidade}<br>${d.regiao}`);
     markers.push(m);
   });
-  // Ajusta o mapa para caber todos os pontos da região, mas sem zoom exagerado
-  if(filtrados.length>1){
+  // Ajusta o mapa para caber todos os pontos da região
+  if(filtrados.length>0){
     const group = L.featureGroup(markers);
     map.fitBounds(group.getBounds().pad(0.3));
-  } else if(filtrados.length===1){
-    // Se só um ponto, mantém zoom inicial
-    map.setView([filtrados[0].lat, filtrados[0].lng], 6);
   }
 }
 
 function focarFornecedor(fornecedorNome) {
   const ponto = dados.find(d => d.fornecedor === fornecedorNome);
   if (ponto) {
-    // Move o mapa levemente para o ponto sem alterar zoom global
-    map.panTo([ponto.lat, ponto.lng]);
+    // Faz um zoom leve para perceber a posição dentro da região
+    const currentZoom = map.getZoom();
+    const targetZoom = Math.max(currentZoom, 8); // aumenta até 8 se estiver menor
+    map.setView([ponto.lat, ponto.lng], targetZoom, {animate:true});
     L.popup()
       .setLatLng([ponto.lat, ponto.lng])
       .setContent(`<b>${ponto.fornecedor}</b><br>${ponto.produto}<br>${ponto.cidade}<br>${ponto.regiao}`)
