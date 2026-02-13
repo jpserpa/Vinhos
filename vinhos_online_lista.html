@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Mapa Interativo dos Vinhos</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<style>
+body { margin:0; font-family: Arial; }
+#sidebar {
+  width: 300px;
+  height: 100vh;
+  float: left;
+  padding: 15px;
+  background: #f4f4f4;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+#map { height: 100vh; margin-left:300px; }
+button.fornecedor {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 5px;
+  cursor: pointer;
+  text-align: left;
+}
+button.fornecedor:hover {
+  background-color: #ddd;
+}
+h2 { margin-top: 0; }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <h2>Vinhos de Portugal</h2>
+  <label>Região</label>
+  <select id="regiao"></select>
+  <div id="fornecedoresLista"></div>
+  <p id="contador"></p>
+</div>
+
+<div id="map"></div>
+
+<script>
+const dados = [
+ {regiao:"Alentejo", fornecedor:"Tiago Cabaço", produto:"Blog Tour", lat:38.57, lng:-7.9},
+ {regiao:"Alentejo", fornecedor:"Herdade do Esporão", produto:"Monte Velho", lat:38.30, lng:-7.50},
+ {regiao:"Setúbal", fornecedor:"José Maria da Fonseca", produto:"Periquita", lat:38.52, lng:-8.89},
+ {regiao:"Setúbal", fornecedor:"Bacalhôa", produto:"Catarina", lat:38.55, lng:-8.88},
+ {regiao:"Douro", fornecedor:"Graham’s", produto:"Six Grapes", lat:41.14, lng:-8.61},
+ {regiao:"Douro", fornecedor:"Sogrape", produto:"Papa Figos", lat:41.16, lng:-7.79},
+ {regiao:"Vinho Verde", fornecedor:"Aveleda", produto:"Casal Garcia", lat:41.21, lng:-8.28},
+ {regiao:"Lisboa", fornecedor:"Casa Santos Lima", produto:"Colossal", lat:39.05, lng:-9.00},
+ {regiao:"Algarve", fornecedor:"Quinta dos Vales", produto:"Grace Vineyard", lat:37.12, lng:-8.45},
+ {regiao:"Açores", fornecedor:"Azores Wine Company", produto:"Terrantez", lat:38.47, lng:-28.40},
+ {regiao:"Madeira", fornecedor:"Henriques & Henriques", produto:"10 Years", lat:32.65, lng:-16.90}
+];
+
+const map = L.map('map').setView([39.5, -8], 6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+let markers = [];
+const regiao = document.getElementById("regiao");
+const fornecedoresLista = document.getElementById("fornecedoresLista");
+const contador = document.getElementById("contador");
+
+function atualizarListaFornecedores() {
+  fornecedoresLista.innerHTML = "";
+  const r = regiao.value;
+  const filtrados = dados.filter(d => r==="Todos" || d.regiao===r);
+  const nomesUnicos = [...new Set(filtrados.map(d => d.fornecedor))];
+  nomesUnicos.forEach(f => {
+    const btn = document.createElement("button");
+    btn.innerText = f;
+    btn.className = "fornecedor";
+    btn.onclick = () => focarFornecedor(f);
+    fornecedoresLista.appendChild(btn);
+  });
+  contador.innerText = `Fornecedores visíveis: ${nomesUnicos.length}`;
+}
+
+function atualizarMapa() {
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+  const r = regiao.value;
+  const filtrados = dados.filter(d => r==="Todos" || d.regiao===r);
+  filtrados.forEach(d => {
+    const m = L.marker([d.lat, d.lng])
+      .addTo(map)
+      .bindPopup(`<b>${d.fornecedor}</b><br>${d.produto}<br>${d.regiao}`);
+    markers.push(m);
+  });
+}
+
+function focarFornecedor(fornecedorNome) {
+  const ponto = dados.find(d => d.fornecedor === fornecedorNome);
+  if (ponto) {
+    map.setView([ponto.lat, ponto.lng], 8);
+    L.popup()
+      .setLatLng([ponto.lat, ponto.lng])
+      .setContent(`<b>${ponto.fornecedor}</b><br>${ponto.produto}<br>${ponto.regiao}`)
+      .openOn(map);
+  }
+}
+
+["Todos", ...new Set(dados.map(d=>d.regiao))].forEach(r=>{
+  regiao.add(new Option(r,r));
+});
+
+regiao.onchange = () => {
+  atualizarListaFornecedores();
+  atualizarMapa();
+};
+
+atualizarListaFornecedores();
+atualizarMapa();
+</script>
+
+</body>
+</html>
